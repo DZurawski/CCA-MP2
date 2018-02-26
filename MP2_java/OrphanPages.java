@@ -55,7 +55,7 @@ public class OrphanPages extends Configured implements Tool {
             context.write(token, 0);
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
-                context.write(token, new IntWritable(1))
+                context.write(token, new IntWritable(1));
             }
             // TODO - END MY CODE
         }
