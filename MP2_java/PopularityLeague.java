@@ -171,9 +171,6 @@ public class PopularityLeague extends Configured implements Tool {
             for (String line : readHDFSFile(path, conf).split("\n")) {
                 this.league.add(Integer.parseInt(line));
             }
-            System.out.println(this.league);
-            Collections.sort(this.league);
-            System.out.println(this.league);
         }
         
         @Override
@@ -189,6 +186,7 @@ public class PopularityLeague extends Configured implements Tool {
         protected void cleanup(
                 Context context
                 ) throws IOException, InterruptedException {
+            Collections.sort(this.league, Collections.reverseOrder());
             for (Integer member : this.league) {
                 int count = this.map.get(member);
                 int rank = 0;
