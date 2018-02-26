@@ -190,7 +190,7 @@ public class PopularityLeague extends Configured implements Tool {
                 int count = this.map.get(member);
                 int rank = 0;
                 for (Integer value : this.map.values()) {
-                    rank += count > value " 1 : 0;
+                    rank += count > value ? 1 : 0;
                 }
                 context.write(new IntWritable(member), new IntWritable(rank));
             }
