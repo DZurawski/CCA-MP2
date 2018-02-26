@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo "====================="
 rm -rf TopPopularLinksClasses
 mkdir ./TopPopularLinksClasses
 echo "====================="

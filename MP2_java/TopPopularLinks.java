@@ -89,6 +89,8 @@ public class TopPopularLinks extends Configured implements Tool {
 
     public static class LinkCountMap extends Mapper<Object, Text, IntWritable, IntWritable> {
         // TODO - MY CODE
+        @Override
+        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
@@ -101,16 +103,20 @@ public class TopPopularLinks extends Configured implements Tool {
                 id.set(token);
                 context.write(id, one);
             }
-            // TODO - END MY CODE
+        }
+        // TODO - END MY CODE
     }
 
     public static class LinkCountReduce extends Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
         // TODO - MY CODE
-        int sum = 0;
-        for (IntWritable value : values) {
-            sum += value.get();
+        @Override
+        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+            int sum = 0;
+            for (IntWritable value : values) {
+                sum += value.get();
+            }
+            context.write(key, new IntWritable(sum));
         }
-        context.write(key, new IntWritable(sum));
         // TODO - END MY CODE
     }
 
