@@ -4,9 +4,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-// TODO - MY CODE
-import org.apache.hadoop.io.Writable;
-// TODO - END MY CODE
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -25,6 +22,7 @@ import java.io.IOException;
 import java.lang.Integer;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.Arrays; // Added this on my own. - DRZ
 
 public class TopPopularLinks extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
