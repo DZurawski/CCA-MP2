@@ -210,7 +210,7 @@ public class TopTitles extends Configured implements Tool {
                     token = tokenizer.nextToken().replaceAll("\\D+", "");
                     count.set(Integer.parseInt(token));
                     token = tokenizer.nextToken().trim();
-                    word.set(token.substring(0, token.length() - 1);
+                    word.set(token.substring(0, token.length() - 1));
                     context.write(word, count);
                 }
             }
