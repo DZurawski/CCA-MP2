@@ -171,7 +171,7 @@ public class PopularityLeague extends Configured implements Tool {
             for (String line : readHDFSFile(path, conf).split("\n")) {
                 this.league.add(Integer.parseInt(line));
             }
-            Collections.sort(this.league);
+            Collections.sort(this.league, Collections.reverseOrder());
         }
         
         @Override
@@ -179,7 +179,7 @@ public class PopularityLeague extends Configured implements Tool {
                 Text key, Text value, Context context
                 ) throws IOException, InterruptedException {
             int id = Integer.parseInt(key.toString());
-            int count = Integer.parseInt(key.toString());
+            int count = Integer.parseInt(value.toString());
             this.map.put(id, count);
         }
         
@@ -191,7 +191,7 @@ public class PopularityLeague extends Configured implements Tool {
                 int count = this.map.get(member);
                 int rank = 0;
                 for (Integer value : this.map.values()) {
-                    rank += count > value ? 1 : 0;
+                    rank += (count > value ? 1 : 0);
                 }
                 context.write(new IntWritable(member), new IntWritable(rank));
             }
