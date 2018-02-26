@@ -146,7 +146,7 @@ public class TopPopularLinks extends Configured implements Tool {
         protected void cleanup(Context context) throws IOException, InterruptedException {
             while ( ! this.set.isEmpty()) {
                 Pair<Integer, Integer> pair = this.set.first();
-                int[] numbers = {pair.first, pair.second};
+                Integer[] numbers = {pair.first, pair.second};
                 this.set.remove(pair);
                 IntArrayWritable array = new IntArrayWritable(numbers);
                 context.write(NullWritable.get(), array);
@@ -164,8 +164,8 @@ public class TopPopularLinks extends Configured implements Tool {
         // TODO - MY CODE
         @Override
         public void reduce(NullWritable key, Iterable<IntArrayWritable> values, Context context) throws IOException, InterruptedException {
-            IntWritable[] writables = IntArrayWritable.get();
-            count.write(writables[0], writables[1]);
+            IntWritable[] writables = values.get();
+            context.write(writables[0], writables[1]);
         }
         // TODO - END MY CODE
     }
