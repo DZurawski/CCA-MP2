@@ -94,7 +94,7 @@ public class PopularityLeague extends Configured implements Tool {
             context.write(new IntWritable(token), new IntWritable(0));
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
-                context.write(new IntWritable(token), new IntWritable(1););
+                context.write(new IntWritable(token), new IntWritable(1));
             }
         }
     }
