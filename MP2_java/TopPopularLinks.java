@@ -162,7 +162,7 @@ public class TopPopularLinks extends Configured implements Tool {
         
         // TODO - MY CODE
         @Override
-        public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
+        public void reduce(NullWritable key, Iterable<IntArrayWritable> values, Context context) throws IOException, InterruptedException {
             IntWritable count = new IntWritable();
             IntWritable word = new IntWritable();
             String token;
