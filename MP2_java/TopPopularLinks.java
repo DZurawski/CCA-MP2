@@ -139,7 +139,7 @@ public class TopPopularLinks extends Configured implements Tool {
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
             Integer word = Integer.parseInt(key.toString());
             Integer count = Integer.parseInt(value.toString());
-            this.set.add(new Pair<Integer, Integer>(count, word));
+            this.set.add(new Pair<Integer, Integer>(word, count));
             if (this.set.size() > this.total) {
                 this.set.remove(this.set.first());
             }
