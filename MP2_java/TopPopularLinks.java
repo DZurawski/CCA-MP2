@@ -31,7 +31,45 @@ public class TopPopularLinks extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
-        //TODO
+        //TODO - MY CODE
+        Configuration conf = this.getConf();
+        FileSystem fs = FileSystem.get(conf);
+        Path tmpPath = new Path("./tmp");
+        fs.delete(tmpPath, true);
+
+        Job jobA = Job.getInstance(conf, "Link Count");
+        jobA.setOutputKeyClass(IntWritable.class);
+        jobA.setOutputValueClass(IntWritable.class);
+
+        jobA.setMapperClass(LinkCountMap.class);
+        jobA.setReducerClass(LinkCountReduce.class);
+
+        FileInputFormat.setInputPaths(jobA, new Path(args[0]));
+        FileOutputFormat.setOutputPath(jobA, tmpPath);
+
+        jobA.setJarByClass(TopPopularLinks.class);
+        jobA.waitForCompletion(true);
+
+        Job jobB = Job.getInstance(conf, "Top Links");
+        jobB.setOutputKeyClass(IntWritable.class);
+        jobB.setOutputValueClass(IntWritable.class);
+
+        jobB.setMapOutputKeyClass(NullWritable.class);
+        jobB.setMapOutputValueClass(IntArrayWritable.class);
+
+        jobB.setMapperClass(TopLinksMap.class);
+        jobB.setReducerClass(TopLinksReduce.class);
+        jobB.setNumReduceTasks(1);
+
+        FileInputFormat.setInputPaths(jobB, tmpPath);
+        FileOutputFormat.setOutputPath(jobB, new Path(args[1]));
+
+        jobB.setInputFormatClass(KeyValueTextInputFormat.class);
+        jobB.setOutputFormatClass(TextOutputFormat.class);
+
+        jobB.setJarByClass(TopPopularLinks.class);
+        return jobB.waitForCompletion(true) ? 0 : 1;
+        // TODO - END MY CODE
     }
 
     public static class IntArrayWritable extends ArrayWritable {
@@ -50,31 +88,90 @@ public class TopPopularLinks extends Configured implements Tool {
     }
 
     public static class LinkCountMap extends Mapper<Object, Text, IntWritable, IntWritable> {
-        //TODO
+        // TODO - MY CODE
+            String line = value.toString();
+            StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
+            int token = Integer.parseInt(tokenizer.nextToken().trim());
+            IntWritable id = new IntWritable(token);
+            IntWritable zero = new IntWritable(0);
+            IntWritable one = new IntWritable(1);
+            context.write(id, zero);
+            while (tokenizer.hasMoreTokens()) {
+                token = Integer.parseInt(tokenizer.nextToken().trim());
+                id.set(token);
+                context.write(id, one);
+            }
+            // TODO - END MY CODE
     }
 
     public static class LinkCountReduce extends Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
-        //TODO
+        // TODO - MY CODE
+        int sum = 0;
+        for (IntWritable value : values) {
+            sum += value.get();
+        }
+        context.write(key, new IntWritable(sum));
+        // TODO - END MY CODE
     }
 
     public static class TopLinksMap extends Mapper<Text, Text, NullWritable, IntArrayWritable> {
-
+        // TODO - MY CODE
+        private TreeSet<Pair<Integer, Integer>> set = new TreeSet<>();
+        private final int total = 10;
+        // TODO - END MY CODE
+        
         @Override
         protected void setup(Context context) throws IOException,InterruptedException {
             Configuration conf = context.getConfiguration();
         }
 
-       //TODO
+        // TODO - MY CODE
+        @Override
+        public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            Integer count = Integer.parseInt(value.toString());
+            Integer word = Integer.parseInt(key.toString());
+            this.set.add(new Pair<Integer, Integer>(count, word));
+            if (this.set.size() > this.total) {
+                this.set.remove(this.set.first());
+            }
+        }
+
+        @Override
+        protected void cleanup(Context context) throws IOException, InterruptedException {
+            int[] numbers = new int[this.set.size()];
+            for (int i = 0; ! this.set.isEmpty(); i++) {
+                numbers[i] = this.set.first();
+                this.set.remove(this.set.first());
+            }
+            context.write(NullWritable.get(), new IntArrayWritable(numbers));
+        }
+        // TODO - END MY CODE
     }
 
     public static class TopLinksReduce extends Reducer<NullWritable, IntArrayWritable, IntWritable, IntWritable> {
-
         @Override
         protected void setup(Context context) throws IOException,InterruptedException {
             Configuration conf = context.getConfiguration();
         }
-        //TODO
-
+        
+        // TODO - MY CODE
+        @Override
+        public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
+            IntWritable count = new IntWritable();
+            IntWritable word = new IntWritable();
+            String token;
+            for (TextArrayWritable value : values) {
+                for (String text : value.toStrings()) {
+                    StringTokenizer tokenizer = new StringTokenizer(text, " ");
+                    token = tokenizer.nextToken().replaceAll("\\D+", "");
+                    count.set(Integer.parseInt(token));
+                    token = tokenizer.nextToken().replaceAll("\\D+", "");
+                    word.set(Integer.parseInt(token));
+                    context.write(word, count);
+                }
+            }
+        }
+        // TODO - END MY CODE
     }
 }
 

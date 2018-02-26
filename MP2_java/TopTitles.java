@@ -189,10 +189,6 @@ public class TopTitles extends Configured implements Tool {
     }
 
     public static class TopTitlesReduce extends Reducer<NullWritable, TextArrayWritable, Text, IntWritable> {
-        // TODO - MY CODE
-        /* I decided to leave this area blank. */
-        // TODO - END MY CODE
-
         @Override
         protected void setup(Context context) throws IOException,InterruptedException {
             Configuration conf = context.getConfiguration();
@@ -210,7 +206,7 @@ public class TopTitles extends Configured implements Tool {
                     token = tokenizer.nextToken().replaceAll("\\D+", "");
                     count.set(Integer.parseInt(token));
                     token = tokenizer.nextToken().trim();
-                    word.set(token.substring(0, token.length() - 1).trim());
+                    word.set(token.substring(0, token.length() - 1));
                     context.write(word, count);
                 }
             }
