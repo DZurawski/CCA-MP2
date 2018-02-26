@@ -4,7 +4,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+// TODO - MY CODE
 import org.apache.hadoop.io.Writable;
+// TODO - END MY CODE
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -168,7 +170,7 @@ public class TopPopularLinks extends Configured implements Tool {
             for (IntArrayWritable value : values) {
                 IntWritable[] writables = new IntWritable[2];
                 int i = 0;
-                for (Writable writable : value) {
+                for (Writable writable : value.get()) {
                     writables[i] = (IntWritable)writable;
                     i++;
                 }
