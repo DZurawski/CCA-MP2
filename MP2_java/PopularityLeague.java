@@ -48,7 +48,7 @@ public class PopularityLeague extends Configured implements Tool {
         FileOutputFormat.setOutputPath(jobA, tmpPath);
 
         jobA.setJarByClass(PopularityLeague.class);
-        jobA.waitForCompletion(true);
+        return jobA.waitForCompletion(true) ? 0 : 1;
     }
 
     public static class IntArrayWritable extends ArrayWritable {
@@ -105,6 +105,9 @@ public class PopularityLeague extends Configured implements Tool {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
+            if (this.league.contains(token)) {
+                context.write(new IntWritable(token), new IntWritable(0));
+            }
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
                 if (this.league.contains(token) {
@@ -115,7 +118,8 @@ public class PopularityLeague extends Configured implements Tool {
     }
     
     public static class LinkCountReduce
-            extends Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
+            extends Reducer<IntWritable, IntWritable,
+                            IntWritable, IntWritable> {
         @Override
         public void reduce(
                 IntWritable key, Iterable<IntWritable> values, Context context
@@ -125,41 +129,6 @@ public class PopularityLeague extends Configured implements Tool {
                 sum += value.get();
             }
             context.write(key, new IntWritable(sum));
-        }
-    }
-    
-    public static class TopLinksMap extends Mapper<Text, Text, NullWritable, IntArrayWritable> {
-        private List<Integer> league;
-        
-        @Override
-        protected void setup(Context context) throws IOException,InterruptedException {
-            Configuration conf = context.getConfiguration();
-            String path = conf.get("league");
-            String[] lines = readHDFSFile(path, conf).split("\n");
-            this.league
-                = Arrays.stream(lines).mapToInt(Integer::parseInt).toList();
-        }
-
-        // TODO - MY CODE
-        @Override
-        public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-            Integer word = Integer.parseInt(key.toString());
-            Integer count = Integer.parseInt(value.toString());
-            this.set.add(new Pair<Integer, Integer>(count, word));
-            if (this.set.size() > this.total) {
-                this.set.remove(this.set.first());
-            }
-        }
-
-        @Override
-        protected void cleanup(Context context) throws IOException, InterruptedException {
-            while ( ! this.set.isEmpty()) {
-                Pair<Integer, Integer> pair = this.set.last();
-                Integer[] numbers = {pair.second, pair.first};
-                this.set.remove(pair);
-                IntArrayWritable array = new IntArrayWritable(numbers);
-                context.write(NullWritable.get(), array);
-            }
         }
     }
     // TODO - END MY CODE
