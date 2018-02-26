@@ -148,7 +148,7 @@ public class TopPopularLinks extends Configured implements Tool {
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
             while ( ! this.set.isEmpty()) {
-                Pair<Integer, Integer> pair = this.set.floor();
+                Pair<Integer, Integer> pair = this.set.last();
                 Integer[] numbers = {pair.second, pair.first};
                 this.set.remove(pair);
                 IntArrayWritable array = new IntArrayWritable(numbers);
