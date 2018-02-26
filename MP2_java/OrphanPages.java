@@ -52,10 +52,13 @@ public class OrphanPages extends Configured implements Tool {
             StringTokenizer tokenizer = new StringTokenizer(line, ",:");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
             IntWritable id = new IntWritable(token);
-            context.write(token, 0);
+            IntWritable zero = new IntWritable(0);
+            IntWritable one = new IntWritable(1);
+            context.write(id, zero);
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
-                context.write(token, new IntWritable(1));
+                id.set(token);
+                context.write(id, one);
             }
             // TODO - END MY CODE
         }
