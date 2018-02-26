@@ -234,7 +234,7 @@ public class TopTitleStatistics extends Configured implements Tool {
             for (int count : counts) {
                 var += (mean - count) * (mean - count);
             }
-            var = var / this.count;
+            var = var / this.total;
             // TODO - END MY CODE
 
             context.write(new Text("Mean"), new IntWritable(mean));
