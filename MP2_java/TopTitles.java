@@ -195,9 +195,9 @@ public class TopTitles extends Configured implements Tool {
         public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
             for (TextArrayWritable value : values) {
-                IntWritable[] writables
+                TextWritable[] writables
                     = Arrays.copyOf(
-                        value.get(), value.get().length, IntWritable[].class);
+                        value.get(), value.get().length, TextWritable[].class);
                 context.write(writables[0], writables[1]);
             }
             // TODO - END MY CODE
