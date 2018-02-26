@@ -158,7 +158,7 @@ public class PopularityLeague extends Configured implements Tool {
     }
     
     public static class LeagueMap
-            extends Mapper<Text, Text, IntWritable, IntWritable> {
+            extends Mapper<Text, Text, NullWritable, IntArrayWritable> {
         private HashMap<Integer, Integer> map = new HashMap<>();
         private ArrayList<Integer> league = new ArrayList<>();
         
@@ -193,20 +193,25 @@ public class PopularityLeague extends Configured implements Tool {
                 for (Integer value : this.map.values()) {
                     rank += (count > value ? 1 : 0);
                 }
-                context.write(new IntWritable(member), new IntWritable(rank));
+                Integer[] array = {count, rank};
+                IntArrayWritable writable = new IntArrayWritable(array);
+                context.write(NullWritable.get(), writable);
             }
         }
     }
     
     public static class LeagueReduce
-            extends Reducer<IntWritable, IntWritable,
+            extends Reducer<NullWritable, IntArrayWritable,
                             IntWritable, IntWritable> {
         @Override
         public void reduce(
-                IntWritable key, Iterable<IntWritable> values, Context context
+                NullWritable key, Iterable<IntArrayWritable> values,
+                Context context
                 ) throws IOException, InterruptedException {
-            for (IntWritable value : values) {
-                context.write(key, value);
+            for (IntArrayWritable value : values) {
+                IntWritable[] texts = Arrays.copyOf(
+                    value.get(), value.get().length, IntWritable[].class);
+                context.write(texts[0], texts[1]);
             }
         }
     }
