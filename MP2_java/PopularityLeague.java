@@ -84,6 +84,20 @@ public class PopularityLeague extends Configured implements Tool {
     // TODO - MY CODE
     public static class LinkCountMap
             extends Mapper<Object, Text, IntWritable, IntWritable> {
+        private HashSet<Integer> league;
+        
+        @Override
+        protected void setup(
+                Context context
+                ) throws IOException,InterruptedException {
+            Configuration conf = context.getConfiguration();
+            String path = conf.get("league");
+            String[] lines = readHDFSFile(path, conf).split("\n");
+            List<Integer> list
+                = Arrays.stream(lines).mapToInt(Integer::parseInt).toList();
+            this.league = new HashSet<Integer>(list);
+        }
+        
         @Override
         public void map(
                 Object key, Text value, Context context
@@ -91,10 +105,11 @@ public class PopularityLeague extends Configured implements Tool {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
-            context.write(new IntWritable(token), new IntWritable(0));
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
-                context.write(new IntWritable(token), new IntWritable(1));
+                if (this.league.contains(token) {
+                    context.write(new IntWritable(token), new IntWritable(1));
+                }
             }
         }
     }
@@ -106,10 +121,45 @@ public class PopularityLeague extends Configured implements Tool {
                 IntWritable key, Iterable<IntWritable> values, Context context
                 ) throws IOException, InterruptedException {
             int sum = 0;
-            for (value : values) {
+            for (IntWritable value : values) {
                 sum += value.get();
             }
             context.write(key, new IntWritable(sum));
+        }
+    }
+    
+    public static class TopLinksMap extends Mapper<Text, Text, NullWritable, IntArrayWritable> {
+        private List<Integer> league;
+        
+        @Override
+        protected void setup(Context context) throws IOException,InterruptedException {
+            Configuration conf = context.getConfiguration();
+            String path = conf.get("league");
+            String[] lines = readHDFSFile(path, conf).split("\n");
+            this.league
+                = Arrays.stream(lines).mapToInt(Integer::parseInt).toList();
+        }
+
+        // TODO - MY CODE
+        @Override
+        public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
+            Integer word = Integer.parseInt(key.toString());
+            Integer count = Integer.parseInt(value.toString());
+            this.set.add(new Pair<Integer, Integer>(count, word));
+            if (this.set.size() > this.total) {
+                this.set.remove(this.set.first());
+            }
+        }
+
+        @Override
+        protected void cleanup(Context context) throws IOException, InterruptedException {
+            while ( ! this.set.isEmpty()) {
+                Pair<Integer, Integer> pair = this.set.last();
+                Integer[] numbers = {pair.second, pair.first};
+                this.set.remove(pair);
+                IntArrayWritable array = new IntArrayWritable(numbers);
+                context.write(NullWritable.get(), array);
+            }
         }
     }
     // TODO - END MY CODE

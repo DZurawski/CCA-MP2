@@ -111,12 +111,9 @@ public class TopTitles extends Configured implements Tool {
 
         @Override
         protected void setup(Context context) throws IOException,InterruptedException {
-
             Configuration conf = context.getConfiguration();
-
             String stopWordsPath = conf.get("stopwords");
             String delimitersPath = conf.get("delimiters");
-
             this.stopWords = Arrays.asList(readHDFSFile(stopWordsPath, conf).split("\n"));
             this.delimiters = readHDFSFile(delimitersPath, conf);
         }
@@ -125,14 +122,13 @@ public class TopTitles extends Configured implements Tool {
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
-            IntWritable one = new IntWritable(1);
-            Text token = new Text();
+            String token;
             StringTokenizer tokenizer
                 = new StringTokenizer(value.toString(), this.delimiters);
             while (tokenizer.hasMoreTokens()) {
-                token.set(tokenizer.nextToken().trim().toLowerCase());
-                if ( ! this.stopWords.contains(token.toString())) {
-                    context.write(token, one);
+                token = tokenizer.nextToken().trim().toLowerCase();
+                if ( ! this.stopWords.contains(token)) {
+                    context.write(new Text(token), new IntWritable(1));
                 }
             }
             // TODO - END MY CODE
@@ -178,12 +174,13 @@ public class TopTitles extends Configured implements Tool {
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
-            String[] texts = new String[this.set.size()];
-            for (int i = 0; ! this.set.isEmpty(); i++) {
-                texts[i] = this.set.first().toString();
-                this.set.remove(this.set.first());
+            while ( ! this.set.isEmpty()) {
+                Pair<Integer, String> pair = this.set.last();
+                String[] strings = {pair.first, pair.second};
+                TextArrayWritable writable = new TextArrayWritable(strings));
+                context.write(NullWritable.get(), writable);
+                this.set.remove(pair);
             }
-            context.write(NullWritable.get(), new TextArrayWritable(texts));
             // TODO - END MY CODE
         }
     }
@@ -197,18 +194,11 @@ public class TopTitles extends Configured implements Tool {
         @Override
         public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
-            IntWritable count = new IntWritable();
-            Text word = new Text();
-            String token;
             for (TextArrayWritable value : values) {
-                for (String text : value.toStrings()) {
-                    StringTokenizer tokenizer = new StringTokenizer(text, " ");
-                    token = tokenizer.nextToken().replaceAll("\\D+", "");
-                    count.set(Integer.parseInt(token));
-                    token = tokenizer.nextToken().trim();
-                    word.set(token.substring(0, token.length() - 1));
-                    context.write(word, count);
-                }
+                IntWritable[] writables
+                    = Arrays.copyOf(
+                        value.get(), value.get().length, IntWritable[].class);
+                context.write(writables[0], writables[1]);
             }
             // TODO - END MY CODE
         }
