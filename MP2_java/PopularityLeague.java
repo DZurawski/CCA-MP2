@@ -177,8 +177,8 @@ public class PopularityLeague extends Configured implements Tool {
         public void map(
                 Text key, Text value, Context context
                 ) throws IOException, InterruptedException {
-            int id = Integer.ParseInt(key.toString());
-            int count = Integer.ParseInt(key.toString());
+            int id = Integer.parseInt(key.toString());
+            int count = Integer.parseInt(key.toString());
             this.map.put(id, count);
         }
         
