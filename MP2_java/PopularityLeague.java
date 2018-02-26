@@ -171,7 +171,7 @@ public class PopularityLeague extends Configured implements Tool {
             for (String line : readHDFSFile(path, conf).split("\n")) {
                 this.league.add(Integer.parseInt(line));
             }
-            Collections.sort(this.league, Collections.reverseOrder());
+            Collections.sort(this.league);
         }
         
         @Override
