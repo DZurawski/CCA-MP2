@@ -97,14 +97,10 @@ public class TopPopularLinks extends Configured implements Tool {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
-            IntWritable id = new IntWritable(token);
-            IntWritable zero = new IntWritable(0);
-            IntWritable one = new IntWritable(1);
-            context.write(id, zero);
+            context.write(new IntWritable(token), new IntWritable(0));
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
-                id.set(token);
-                context.write(id, one);
+                context.write(new IntWritable(token), new IntWritable(1));
             }
         }
         // TODO - END MY CODE
@@ -149,10 +145,10 @@ public class TopPopularLinks extends Configured implements Tool {
         protected void cleanup(Context context) throws IOException, InterruptedException {
             while ( ! this.set.isEmpty()) {
                 Pair<Integer, Integer> pair = this.set.last();
-                Integer[] numbers = {pair.second, pair.first};
-                this.set.remove(pair);
+                Integer[] numbers = {pair.first, pair.second};
                 IntArrayWritable array = new IntArrayWritable(numbers);
                 context.write(NullWritable.get(), array);
+                this.set.remove(pair);
             }
         }
         // TODO - END MY CODE
@@ -168,13 +164,8 @@ public class TopPopularLinks extends Configured implements Tool {
         @Override
         public void reduce(NullWritable key, Iterable<IntArrayWritable> values, Context context) throws IOException, InterruptedException {
             for (IntArrayWritable value : values) {
-                IntWritable[] writables = new IntWritable[2];
-                int i = 0;
-                for (Writable writable : value.get()) {
-                    writables[i] = (IntWritable)writable;
-                    i++;
-                }
-                context.write(writables[0], writables[1]);
+                IntWritable[] texts = Arrays.copyOf(value.get(), value.get().length, IntWritable[].class);
+                context.write(texts[0], texts[1]);
             }
         }
         // TODO - END MY CODE
