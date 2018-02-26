@@ -131,9 +131,9 @@ public class TopPopularLinks extends Configured implements Tool {
         // TODO - MY CODE
         @Override
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-            Integer word = Integer.parseInt(key.toString());
-            Integer count = Integer.parseInt(value.toString());
-            this.set.add(new Pair<Integer, Integer>(count, word));
+            Integer first = Integer.parseInt(value.toString());
+            Integer second = Integer.parseInt(key.toString());
+            this.set.add(new Pair<Integer, Integer>(first, second));
             if (this.set.size() > this.total) {
                 this.set.remove(this.set.first());
             }
@@ -143,7 +143,7 @@ public class TopPopularLinks extends Configured implements Tool {
         protected void cleanup(Context context) throws IOException, InterruptedException {
             while ( ! this.set.isEmpty()) {
                 Pair<Integer, Integer> pair = this.set.last();
-                Integer[] numbers = {pair.first, pair.second};
+                Integer[] numbers = {pair.second, pair.first};
                 IntArrayWritable array = new IntArrayWritable(numbers);
                 context.write(NullWritable.get(), array);
                 this.set.remove(pair);
