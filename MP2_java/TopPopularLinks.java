@@ -110,7 +110,7 @@ public class TopPopularLinks extends Configured implements Tool {
     public static class LinkCountReduce extends Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
         // TODO - MY CODE
         @Override
-        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+        public void reduce(IntWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
             int sum = 0;
             for (IntWritable value : values) {
                 sum += value.get();
@@ -134,8 +134,8 @@ public class TopPopularLinks extends Configured implements Tool {
         // TODO - MY CODE
         @Override
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-            Integer count = Integer.parseInt(value.toString());
             Integer word = Integer.parseInt(key.toString());
+            Integer count = Integer.parseInt(value.toString());
             this.set.add(new Pair<Integer, Integer>(count, word));
             if (this.set.size() > this.total) {
                 this.set.remove(this.set.first());
@@ -144,12 +144,13 @@ public class TopPopularLinks extends Configured implements Tool {
 
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
-            int[] numbers = new int[this.set.size()];
-            for (int i = 0; ! this.set.isEmpty(); i++) {
-                numbers[i] = this.set.first();
-                this.set.remove(this.set.first());
+            while ( ! this.set.isEmpty()) {
+                Pair<Integer, Integer> pair = this.set.first();
+                int[] numbers = {pair.first, pair.second};
+                this.set.remove(pair);
+                IntArrayWritable array = new IntArrayWritable(numbers);
+                context.write(NullWritable.get(), array);
             }
-            context.write(NullWritable.get(), new IntArrayWritable(numbers));
         }
         // TODO - END MY CODE
     }
@@ -163,19 +164,8 @@ public class TopPopularLinks extends Configured implements Tool {
         // TODO - MY CODE
         @Override
         public void reduce(NullWritable key, Iterable<IntArrayWritable> values, Context context) throws IOException, InterruptedException {
-            IntWritable count = new IntWritable();
-            IntWritable word = new IntWritable();
-            String token;
-            for (TextArrayWritable value : values) {
-                for (String text : value.toStrings()) {
-                    StringTokenizer tokenizer = new StringTokenizer(text, " ");
-                    token = tokenizer.nextToken().replaceAll("\\D+", "");
-                    count.set(Integer.parseInt(token));
-                    token = tokenizer.nextToken().replaceAll("\\D+", "");
-                    word.set(Integer.parseInt(token));
-                    context.write(word, count);
-                }
-            }
+            IntWritable[] writables = IntArrayWritable.get();
+            count.write(writables[0], writables[1]);
         }
         // TODO - END MY CODE
     }
