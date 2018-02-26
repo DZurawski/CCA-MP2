@@ -49,7 +49,7 @@ public class OrphanPages extends Configured implements Tool {
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
             String line = value.toString();
-            StringTokenizer tokenizer = new StringTokenizer(line, ",:");
+            StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
             IntWritable id = new IntWritable(token);
             IntWritable zero = new IntWritable(0);
