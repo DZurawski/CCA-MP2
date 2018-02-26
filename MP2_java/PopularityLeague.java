@@ -105,7 +105,10 @@ public class PopularityLeague extends Configured implements Tool {
         public void reduce(
                 IntWritable key, Iterable<IntWritable> values, Context context
                 ) throws IOException, InterruptedException {
-            int sum = values.stream().mapToInt(value -> value.get()).sum();
+            int sum = 0;
+            for (value : values) {
+                sum += value.get();
+            }
             context.write(key, new IntWritable(sum));
         }
     }
