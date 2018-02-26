@@ -199,8 +199,8 @@ public class TopTitles extends Configured implements Tool {
                     = Arrays.copyOf(
                         value.get(), value.get().length, Text[].class);
                 IntWritable count
-                    = new IntWritable(Integer.parseInt(texts[1].toString()));
-                context.write(texts[0], count);
+                    = new IntWritable(Integer.parseInt(texts[0].toString()));
+                context.write(texts[1], count);
             }
             // TODO - END MY CODE
         }
