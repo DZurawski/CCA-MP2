@@ -127,14 +127,12 @@ public class TopTitleStatistics extends Configured implements Tool {
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
-            IntWritable one = new IntWritable(1);
-            Text token = new Text();
-            StringTokenizer tokenizer
-                = new StringTokenizer(value.toString(), this.delimiters);
+            String token;
+            StringTokenizer tokenizer = new StringTokenizer(value.toString(), this.delimiters);
             while (tokenizer.hasMoreTokens()) {
-                token.set(tokenizer.nextToken().trim().toLowerCase());
-                if ( ! this.stopWords.contains(token.toString())) {
-                    context.write(token, one);
+                token = tokenizer.nextToken().trim().toLowerCase();
+                if ( ! this.stopWords.contains(token)) {
+                    context.write(new Text(token), new IntWritable(1));
                 }
             }
             // TODO - END MY CODE
@@ -176,16 +174,17 @@ public class TopTitleStatistics extends Configured implements Tool {
             }
             // TODO - END MY CODE
         }
-
+        
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
-            String[] texts = new String[this.set.size()];
-            for (int i = 0; ! this.set.isEmpty(); i++) {
-                texts[i] = this.set.first().toString();
-                this.set.remove(this.set.first());
+            while ( ! this.set.isEmpty()) {
+                Pair<Integer, String> pair = this.set.last();
+                String[] strings = {pair.first.toString(), pair.second};
+                TextArrayWritable writable = new TextArrayWritable(strings);
+                context.write(NullWritable.get(), writable);
+                this.set.remove(pair);
             }
-            context.write(NullWritable.get(), new TextArrayWritable(texts));
             // TODO - END MY CODE
         }
     }
@@ -204,21 +203,14 @@ public class TopTitleStatistics extends Configured implements Tool {
         public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
             Integer sum = 0, mean = 0, max = null, min = null, var = 0;
-            
-            // Get an array of all the counts.
-            String token;
             int[] counts = new int[this.total];
+            int index = 0;
             for (TextArrayWritable value : values) {
-                int index = 0;
-                for (String text : value.toStrings()) {
-                    StringTokenizer tokenizer = new StringTokenizer(text, " ");
-                    token = tokenizer.nextToken().replaceAll("\\D+", "");
-                    counts[index] = Integer.parseInt(token);
-                    index++;
-                }
+                Text[] texts = Arrays.copyOf(value.get(), value.get().length, Text[].class);
+                IntWritable count = new IntWritable(Integer.parseInt(texts[0].toString()));
+                counts[index] = count.get();
+                index++;
             }
-            
-            // Calculate the sum, max, min and mean.
             for (int count : counts) {
                 sum += count;
                 if (max == null || count > max) {
@@ -229,8 +221,6 @@ public class TopTitleStatistics extends Configured implements Tool {
                 }
             }
             mean = sum / this.total;
-            
-            // Calculate the variance now that we have the mean.
             for (int count : counts) {
                 var += (mean - count) * (mean - count);
             }
@@ -244,7 +234,6 @@ public class TopTitleStatistics extends Configured implements Tool {
             context.write(new Text("Var"), new IntWritable(var));
         }
     }
-
 }
 
 

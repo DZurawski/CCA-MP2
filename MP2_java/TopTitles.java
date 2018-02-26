@@ -123,8 +123,7 @@ public class TopTitles extends Configured implements Tool {
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
             String token;
-            StringTokenizer tokenizer
-                = new StringTokenizer(value.toString(), this.delimiters);
+            StringTokenizer tokenizer = new StringTokenizer(value.toString(), this.delimiters);
             while (tokenizer.hasMoreTokens()) {
                 token = tokenizer.nextToken().trim().toLowerCase();
                 if ( ! this.stopWords.contains(token)) {
@@ -195,11 +194,8 @@ public class TopTitles extends Configured implements Tool {
         public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
             // TODO - MY CODE
             for (TextArrayWritable value : values) {
-                Text[] texts
-                    = Arrays.copyOf(
-                        value.get(), value.get().length, Text[].class);
-                IntWritable count
-                    = new IntWritable(Integer.parseInt(texts[0].toString()));
+                Text[] texts = Arrays.copyOf(value.get(), value.get().length, Text[].class);
+                IntWritable count = new IntWritable(Integer.parseInt(texts[0].toString()));
                 context.write(texts[1], count);
             }
             // TODO - END MY CODE
