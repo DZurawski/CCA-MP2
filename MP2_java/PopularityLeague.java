@@ -54,8 +54,8 @@ public class PopularityLeague extends Configured implements Tool {
         jobB.setOutputKeyClass(IntWritable.class);
         jobB.setOutputValueClass(IntWritable.class);
 
-        jobB.setMapOutputKeyClass(IntWritable.class);
-        jobB.setMapOutputValueClass(IntWritable.class);
+        jobB.setMapOutputKeyClass(NullWritable.class);
+        jobB.setMapOutputValueClass(IntArrayWritable.class);
 
         jobB.setMapperClass(LeagueMap.class);
         jobB.setReducerClass(LeagueReduce.class);
