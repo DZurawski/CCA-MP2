@@ -23,7 +23,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.Collectors; // Added this on my own. - DRZ
 
 public class PopularityLeague extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
@@ -85,7 +84,7 @@ public class PopularityLeague extends Configured implements Tool {
     // TODO - MY CODE
     public static class LinkCountMap
             extends Mapper<Object, Text, IntWritable, IntWritable> {
-        private HashSet<Integer> league;
+        private HashSet<Integer> league = new HashSet<>();
         
         @Override
         protected void setup(
@@ -93,10 +92,9 @@ public class PopularityLeague extends Configured implements Tool {
                 ) throws IOException,InterruptedException {
             Configuration conf = context.getConfiguration();
             String path = conf.get("league");
-            String[] lines = readHDFSFile(path, conf).split("\n");
-            this.league = Arrays.stream(lines)
-                                .mapToInt(Integer::parseInt)
-                                .collect(Collectors.toSet());
+            for (String line : readHDFSFile(path, conf).split("\n")) {
+                this.league.add(Integer.parseInt(line));
+            }
         }
         
         @Override
