@@ -48,7 +48,27 @@ public class PopularityLeague extends Configured implements Tool {
         FileOutputFormat.setOutputPath(jobA, tmpPath);
 
         jobA.setJarByClass(PopularityLeague.class);
-        return jobA.waitForCompletion(true) ? 0 : 1;
+        jobA.waitForCompletion(true);
+        
+        Job jobB = Job.getInstance(conf, "League");
+        jobB.setOutputKeyClass(IntWritable.class);
+        jobB.setOutputValueClass(IntWritable.class);
+
+        jobB.setMapOutputKeyClass(IntWritable.class);
+        jobB.setMapOutputValueClass(IntWritable.class);
+
+        jobB.setMapperClass(LeagueMap.class);
+        jobB.setReducerClass(LeagueReduce.class);
+        jobB.setNumReduceTasks(1);
+
+        FileInputFormat.setInputPaths(jobB, tmpPath);
+        FileOutputFormat.setOutputPath(jobB, new Path(args[1]));
+
+        jobB.setInputFormatClass(KeyValueTextInputFormat.class);
+        jobB.setOutputFormatClass(TextOutputFormat.class);
+
+        jobB.setJarByClass(PopularityLeague.class);
+        return jobB.waitForCompletion(true) ? 0 : 1;
     }
 
     public static class IntArrayWritable extends ArrayWritable {
@@ -104,14 +124,20 @@ public class PopularityLeague extends Configured implements Tool {
             String line = value.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
             int token = Integer.parseInt(tokenizer.nextToken().trim());
-            if (this.league.contains(token)) {
-                context.write(new IntWritable(token), new IntWritable(0));
-            }
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
                 if (this.league.contains(token)) {
                     context.write(new IntWritable(token), new IntWritable(1));
                 }
+            }
+        }
+        
+        @Override
+        protected void cleanup(
+                Context context
+                ) throws IOException, InterruptedException {
+            for (Integer member : this.league) {
+                context.write(new IntWritable(member), new IntWritable(1));
             }
         }
     }
@@ -128,6 +154,59 @@ public class PopularityLeague extends Configured implements Tool {
                 sum += value.get();
             }
             context.write(key, new IntWritable(sum));
+        }
+    }
+    
+    public static class LeagueMap
+            extends Mapper<Text, Text, IntWritable, IntWritable> {
+        private HashMap<Integer, Integer> map = new HashMap<>();
+        private ArrayList<Integer> league = new ArrayList<>();
+        
+        @Override
+        protected void setup(
+                Context context
+                ) throws IOException,InterruptedException {
+            Configuration conf = context.getConfiguration();
+            String path = conf.get("league");
+            for (String line : readHDFSFile(path, conf).split("\n")) {
+                this.league.add(Integer.parseInt(line));
+            }
+        }
+        
+        @Override
+        public void map(
+                Text key, Text value, Context context
+                ) throws IOException, InterruptedException {
+            int id = Integer.ParseInt(key.toString());
+            int count = Integer.ParseInt(key.toString());
+            this.map.put(id, count);
+        }
+        
+        @Override
+        protected void cleanup(
+                Context context
+                ) throws IOException, InterruptedException {
+            for (Integer member : this.league) {
+                int count = this.map.get(member);
+                int rank = 0;
+                for (Integer value : this.map.values()) {
+                    rank += count > value " 1 : 0;
+                }
+                context.write(new IntWritable(member), new IntWritable(rank));
+            }
+        }
+    }
+    
+    public static class LeagueReduce
+            extends Reducer<IntWritable, IntWritable,
+                            IntWritable, IntWritable> {
+        @Override
+        public void reduce(
+                IntWritable key, Iterable<IntWritable> values, Context context
+                ) throws IOException, InterruptedException {
+            for (IntWritable value : values) {
+                context.write(key, value);
+            }
         }
     }
     // TODO - END MY CODE
