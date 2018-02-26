@@ -203,12 +203,14 @@ public class TopTitles extends Configured implements Tool {
             // TODO - MY CODE
             IntWritable count = new IntWritable();
             Text word = new Text();
+            String token;
             for (TextArrayWritable value : values) {
                 for (String text : value.toStrings()) {
                     StringTokenizer tokenizer = new StringTokenizer(text, " ");
-                    count.set(Integer.parseInt(
-                        tokenizer.nextToken().replaceAll("\\D+", "")));
-                    word.set(tokenizer.nextToken().replaceAll("\\P{L}+", ""));
+                    token = tokenizer.nextToken().replaceAll("\\D+", "");
+                    count.set(Integer.parseInt(token));
+                    token = tokenizer.nextToken().trim();
+                    word.set(token.substring(0, token.length() - 1);
                     context.write(word, count);
                 }
             }

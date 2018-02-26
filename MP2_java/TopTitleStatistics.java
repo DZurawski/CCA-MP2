@@ -126,19 +126,39 @@ public class TopTitleStatistics extends Configured implements Tool {
 
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            //TODO
+            // TODO - MY CODE
+            IntWritable one = new IntWritable(1);
+            Text token = new Text();
+            StringTokenizer tokenizer
+                = new StringTokenizer(value.toString(), this.delimiters);
+            while (tokenizer.hasMoreTokens()) {
+                token.set(tokenizer.nextToken().trim().toLowerCase());
+                if ( ! this.stopWords.contains(token.toString())) {
+                    context.write(token, one);
+                }
+            }
+            // TODO - END MY CODE
         }
     }
 
     public static class TitleCountReduce extends Reducer<Text, IntWritable, Text, IntWritable> {
         @Override
         public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-            //TODO
+            // TODO - MY CODE
+            int sum = 0;
+            for (IntWritable value : values) {
+                sum += value.get();
+            }
+            context.write(key, new IntWritable(sum));
+            // TODO - END MY CODE
         }
     }
 
     public static class TopTitlesStatMap extends Mapper<Text, Text, NullWritable, TextArrayWritable> {
-        //TODO
+        // TODO - MY CODE
+        private TreeSet<Pair<Integer, String>> set = new TreeSet<>();
+        private final int total = 10;
+        // TODO - END MY CODE
 
         @Override
         protected void setup(Context context) throws IOException,InterruptedException {
@@ -147,17 +167,33 @@ public class TopTitleStatistics extends Configured implements Tool {
 
         @Override
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
-            //TODO
+            // TODO - MY CODE
+            Integer count = Integer.parseInt(value.toString());
+            String word = key.toString();
+            this.set.add(new Pair<Integer, String>(count, word));
+            if (this.set.size() > this.total) {
+                this.set.remove(this.set.first());
+            }
+            // TODO - END MY CODE
         }
 
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
-            //TODO
+            // TODO - MY CODE
+            String[] texts = new String[this.set.size()];
+            for (int i = 0; ! this.set.isEmpty(); i++) {
+                texts[i] = this.set.first().toString();
+                this.set.remove(this.set.first());
+            }
+            context.write(NullWritable.get(), new TextArrayWritable(texts));
+            // TODO - END MY CODE
         }
     }
 
     public static class TopTitlesStatReduce extends Reducer<NullWritable, TextArrayWritable, Text, IntWritable> {
-        //TODO
+        // TODO - MY CODE
+        private final int total = 10;
+        // TODO - END MY CODE
 
         @Override
         protected void setup(Context context) throws IOException,InterruptedException {
@@ -166,8 +202,40 @@ public class TopTitleStatistics extends Configured implements Tool {
 
         @Override
         public void reduce(NullWritable key, Iterable<TextArrayWritable> values, Context context) throws IOException, InterruptedException {
-            Integer sum, mean, max, min, var;
-            //TODO
+            // TODO - MY CODE
+            Integer sum = 0, mean = 0, max = null, min = null, var = 0;
+            
+            // Get an array of all the counts.
+            String token;
+            int[] counts = new int[this.total];
+            for (TextArrayWritable value : values) {
+                int index = 0;
+                for (String text : value.toStrings()) {
+                    StringTokenizer tokenizer = new StringTokenizer(text, " ");
+                    token = tokenizer.nextToken().replaceAll("\\D+", "");
+                    counts[index] = Integer.parseInt(token);
+                    index++;
+                }
+            }
+            
+            // Calculate the sum, max, min and mean.
+            for (int count : counts) {
+                sum += count;
+                if (max == null || count > max) {
+                    max = count;
+                }
+                if (min == null || count < min) {
+                    min = count;
+                }
+            }
+            mean = sum / this.total;
+            
+            // Calculate the variance now that we have the mean.
+            for (int count : counts) {
+                var += (mean - count) * (mean - count);
+            }
+            var = var / this.count;
+            // TODO - END MY CODE
 
             context.write(new Text("Mean"), new IntWritable(mean));
             context.write(new Text("Sum"), new IntWritable(sum));
