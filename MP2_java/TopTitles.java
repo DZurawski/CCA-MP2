@@ -200,7 +200,7 @@ public class TopTitles extends Configured implements Tool {
                         value.get(), value.get().length, Text[].class);
                 IntWritable count
                     = new IntWritable(Integer.parseInt(texts[1].toString()));
-                context.write(texts[0], count));
+                context.write(texts[0], count);
             }
             // TODO - END MY CODE
         }
