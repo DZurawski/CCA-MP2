@@ -139,7 +139,7 @@ public class TopPopularLinks extends Configured implements Tool {
         public void map(Text key, Text value, Context context) throws IOException, InterruptedException {
             Integer word = Integer.parseInt(key.toString());
             Integer count = Integer.parseInt(value.toString());
-            this.set.add(new Pair<Integer, Integer>(word, count));
+            this.set.add(new Pair<Integer, Integer>(count, word));
             if (this.set.size() > this.total) {
                 this.set.remove(this.set.first());
             }
@@ -149,7 +149,7 @@ public class TopPopularLinks extends Configured implements Tool {
         protected void cleanup(Context context) throws IOException, InterruptedException {
             while ( ! this.set.isEmpty()) {
                 Pair<Integer, Integer> pair = this.set.first();
-                Integer[] numbers = {pair.first, pair.second};
+                Integer[] numbers = {pair.second, pair.first};
                 this.set.remove(pair);
                 IntArrayWritable array = new IntArrayWritable(numbers);
                 context.write(NullWritable.get(), array);
