@@ -137,7 +137,7 @@ public class PopularityLeague extends Configured implements Tool {
                 Context context
                 ) throws IOException, InterruptedException {
             for (Integer member : this.league) {
-                context.write(new IntWritable(member), new IntWritable(1));
+                context.write(new IntWritable(member), new IntWritable(0));
             }
         }
     }
