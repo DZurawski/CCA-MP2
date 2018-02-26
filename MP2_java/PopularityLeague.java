@@ -110,7 +110,7 @@ public class PopularityLeague extends Configured implements Tool {
             }
             while (tokenizer.hasMoreTokens()) {
                 token = Integer.parseInt(tokenizer.nextToken().trim());
-                if (this.league.contains(token) {
+                if (this.league.contains(token)) {
                     context.write(new IntWritable(token), new IntWritable(1));
                 }
             }
