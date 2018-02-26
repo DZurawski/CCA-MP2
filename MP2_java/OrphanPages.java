@@ -47,14 +47,31 @@ public class OrphanPages extends Configured implements Tool {
     public static class LinkCountMap extends Mapper<Object, Text, IntWritable, IntWritable> {
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            //TODO
+            // TODO - MY CODE
+            String line = value.toString();
+            StringTokenizer tokenizer = new StringTokenizer(line, ",:");
+            int token = Integer.parseInt(tokenizer.nextToken().trim());
+            IntWritable id = new IntWritable(token);
+            context.write(token, 0);
+            while (tokenizer.hasMoreTokens()) {
+                token = Integer.parseInt(tokenizer.nextToken().trim());
+                context.write(token, new IntWritable(1))
+            }
+            // TODO - END MY CODE
         }
     }
 
     public static class OrphanPageReduce extends Reducer<IntWritable, IntWritable, IntWritable, NullWritable> {
         @Override
         public void reduce(IntWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-            //TODO
+            // TODO - MY CODE
+            for (IntWritable value : values) {
+                if (value.get() > 0) {
+                    return;
+                }
+            }
+            context.write(key, NullWritable.get());
+            // TODO - END MY CODE
         }
     }
 }
