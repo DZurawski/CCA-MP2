@@ -93,9 +93,9 @@ public class PopularityLeague extends Configured implements Tool {
             Configuration conf = context.getConfiguration();
             String path = conf.get("league");
             String[] lines = readHDFSFile(path, conf).split("\n");
-            List<Integer> list
-                = Arrays.stream(lines).mapToInt(Integer::parseInt).toList();
-            this.league = new HashSet<Integer>(list);
+            this.league = Arrays.stream(lines)
+                                .mapToInt(Integer::parseInt)
+                                .collect(Collectors.toSet());
         }
         
         @Override
