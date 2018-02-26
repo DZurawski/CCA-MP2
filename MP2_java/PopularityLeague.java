@@ -25,7 +25,6 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 public class PopularityLeague extends Configured implements Tool {
-
     public static void main(String[] args) throws Exception {
         int res = ToolRunner.run(new Configuration(), new PopularityLeague(), args);
         System.exit(res);
@@ -33,7 +32,23 @@ public class PopularityLeague extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
-        //TODO
+        Configuration conf = this.getConf();
+        FileSystem fs = FileSystem.get(conf);
+        Path tmpPath = new Path("./tmp");
+        fs.delete(tmpPath, true);
+
+        Job jobA = Job.getInstance(conf, "Link Count");
+        jobA.setOutputKeyClass(IntWritable.class);
+        jobA.setOutputValueClass(IntWritable.class);
+
+        jobA.setMapperClass(LinkCountMap.class);
+        jobA.setReducerClass(LinkCountReduce.class);
+
+        FileInputFormat.setInputPaths(jobA, new Path(args[0]));
+        FileOutputFormat.setOutputPath(jobA, tmpPath);
+
+        jobA.setJarByClass(PopularityLeague.class);
+        jobA.waitForCompletion(true);
     }
 
     public static class IntArrayWritable extends ArrayWritable {
@@ -66,5 +81,33 @@ public class PopularityLeague extends Configured implements Tool {
         return everything.toString();
     }
 
-    //TODO
+    // TODO - MY CODE
+    public static class LinkCountMap
+            extends Mapper<Object, Text, IntWritable, IntWritable> {
+        @Override
+        public void map(
+                Object key, Text value, Context context
+                ) throws IOException, InterruptedException {
+            String line = value.toString();
+            StringTokenizer tokenizer = new StringTokenizer(line, ",: ");
+            int token = Integer.parseInt(tokenizer.nextToken().trim());
+            context.write(new IntWritable(token), new IntWritable(0));
+            while (tokenizer.hasMoreTokens()) {
+                token = Integer.parseInt(tokenizer.nextToken().trim());
+                context.write(new IntWritable(token), new IntWritable(1););
+            }
+        }
+    }
+    
+    public static class LinkCountReduce
+            extends Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
+        @Override
+        public void reduce(
+                IntWritable key, Iterable<IntWritable> values, Context context
+                ) throws IOException, InterruptedException {
+            int sum = values.stream().mapToInt(value -> value.get()).sum();
+            context.write(key, new IntWritable(sum));
+        }
+    }
+    // TODO - END MY CODE
 }
