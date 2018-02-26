@@ -1,6 +1,7 @@
 #!/bin/bash
 
 rm -rf TopPopularLinksClasses
+rm -rf D-output 
 mkdir ./TopPopularLinksClasses
 echo "====================="
 javac -cp $(hadoop classpath) TopPopularLinks.java -d TopPopularLinksClasses
@@ -9,4 +10,4 @@ jar -cvf TopPopularLinks.jar -C TopPopularLinksClasses/ ./
 echo "====================="
 hadoop jar TopPopularLinks.jar TopPopularLinks dataset/links ./D-output
 echo "====================="
-cat D- output/part-r-00000
+cat D-output/part-r-00000
