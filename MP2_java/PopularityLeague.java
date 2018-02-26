@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.Collectors; // Added this on my own. - DRZ
 
 public class PopularityLeague extends Configured implements Tool {
     public static void main(String[] args) throws Exception {
@@ -95,7 +96,7 @@ public class PopularityLeague extends Configured implements Tool {
             String[] lines = readHDFSFile(path, conf).split("\n");
             this.league = Arrays.stream(lines)
                                 .mapToInt(Integer::parseInt)
-                                .collect(toSet());
+                                .collect(Collectors.toSet());
         }
         
         @Override
