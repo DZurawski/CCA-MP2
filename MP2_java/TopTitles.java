@@ -176,7 +176,7 @@ public class TopTitles extends Configured implements Tool {
             // TODO - MY CODE
             while ( ! this.set.isEmpty()) {
                 Pair<Integer, String> pair = this.set.last();
-                String[] strings = {pair.first, pair.second};
+                String[] strings = {pair.first.toString(), pair.second};
                 TextArrayWritable writable = new TextArrayWritable(strings);
                 context.write(NullWritable.get(), writable);
                 this.set.remove(pair);
