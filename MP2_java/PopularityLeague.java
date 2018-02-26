@@ -186,7 +186,7 @@ public class PopularityLeague extends Configured implements Tool {
         protected void cleanup(
                 Context context
                 ) throws IOException, InterruptedException {
-            Collections.sort(this.league, Collections.reverseOrder());
+            Collections.sort(this.league);
             for (Integer member : this.league) {
                 int count = this.map.get(member);
                 int rank = 0;
